@@ -2,13 +2,50 @@ from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
 from crawler.items import CourseItem
+import time
 
 class MySpider(Spider):
-	name = 'UCLA'
+	name = 'UCLA'	# name used when executing
 	allowed_domains = ['ucla.edu']
 	#start_urls = ['http://www.registrar.ucla.edu/']
-	start_urls = ['http://www.registrar.ucla.edu/schedule/detselect.aspx?termsel=15S&subareasel=COM+SCI&idxcrs=0111++++']
-	def parse(self, response):
+	base_url = "http://www.registrar.ucla.edu/schedule/schedulehome.aspx"
+	#start_urls = ['http://www.registrar.ucla.edu/schedule/detselect.aspx?termsel=15S&subareasel=ENGL&idxcrs=0004W+++']
+	
+	def print_url(self,major, term):
+		#TODO: handle spaces in the url
+		url =  "http://www.registrar.ucla.edu/schedule/crsredir.aspx?termsel=" + term + "&subareasel="+ major
+		return url.replace(' ','+')
+
+	def start_requests(self):
+		yield Request(url=self.base_url,
+			callback=self.get_subarea_list)
+
+	def get_subarea_list(self, response):
+		majors = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_SOCmain_lstSubjectArea"]/option/@value').extract()
+		terms=[]
+		#TODO: verify this range
+		for year in range(1999,2015):
+			#TODO: add summer
+			for term in ['F','W','S']:
+				terms.append(str(year)[2:]+term)
+
+		for major in majors:
+			for term in terms:
+				url=self.print_url(major,term)
+				yield Request(url=url,
+			callback=self.get_course_list)
+
+	def get_course_list(self, response):
+		courses = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_crsredir1_lstCourseNormal"]/option/@value').extract()
+
+		for course in courses:
+			url = response.url + "&idxcrs=" + course
+			url = url.replace('crsredir','detselect')
+			url = url.replace(' ','+')
+			yield Request(url=url,
+		callback=self.parse_page)
+
+	def parse_page(self, response):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
 		BodyContent = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]')
@@ -18,9 +55,9 @@ class MySpider(Spider):
 		Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
 		GeneralNotes = BodyContent.xpath('table[1]/tr[3]/td/span/text()').extract()
 		ClassNotes = BodyContent.xpath('table[1]/tr[4]/td/span/text()').extract()
-		Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')    # no idea why normal way won't work
+		Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')	# no idea why normal way won't work
 		
-        # section specified information
+		# section specified information
 		sections = sel.xpath('//*[@class="dgdClassDataHeader"]/..')
 		for section in sections:
 			lecture = section.xpath('tr[2]')
@@ -45,6 +82,7 @@ class MySpider(Spider):
 			item['WaitlistTotal'] = lecture.xpath('td[@class="dgdClassDataWaitListTotal"]/span/span/text()').extract()
 			item['WaitlistCap'] = lecture.xpath('td[@class="dgdClassDataWaitListCap"]/span/span/text()').extract()
 			item['Status'] = lecture.xpath('td[@class="dgdClassDataStatus"]/span/span/span/text()').extract()
+			item['TimeStamp'] = [time.strftime("%H:%M %d/%m/%Y")]
 			yield item
 
 			labs = section.xpath('tr[position()>2]')   # first one is header, second is main session
@@ -70,6 +108,7 @@ class MySpider(Spider):
 				item['EnrollCap'] = lab.xpath('td[@class="dgdClassDataEnrollCap"]/span/text()').extract()
 				item['WaitlistTotal'] = lab.xpath('td[@class="dgdClassDataWaitListTotal"]/span/text()').extract()
 				item['WaitlistCap'] = lab.xpath('td[@class="dgdClassDataWaitListCap"]/span/text()').extract()
-				item['Status'] = lab.xpath('td[@class="dgdClassDataStatus"]/span/span/text()').extract()    #two span for red/green
+				item['Status'] = lab.xpath('td[@class="dgdClassDataStatus"]/span/span/text()').extract()	#two span for red/green
+				item['TimeStamp'] = [time.strftime("%H:%M %d/%m/%Y")]
 				yield item
 

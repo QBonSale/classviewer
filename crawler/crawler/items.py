@@ -29,4 +29,5 @@ class CourseItem(scrapy.Item):
 	WaitlistTotal = scrapy.Field()
 	WaitlistCap = scrapy.Field()
 	Status = scrapy.Field()
+	TimeStamp = scrapy.Field()
 
