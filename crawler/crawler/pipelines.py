@@ -9,9 +9,16 @@ import re
 """ 
 Cleans newlines and linefeeds from all fields in the item 
 """ 
-class NewlinePipeline(object): 
+class SpacePipeline(object): 
 	def process_item(self, item, spider): 
+		# process Instructor garbage
+		p = re.compile(u'(\\xa0)+ ') 
+		item['Instructor'] = map(lambda x: p.sub('', x), item['Instructor']) 
+		p = re.compile(r'( )+/') 
+		item['Instructor'] = map(lambda x: p.sub(' /', x), item['Instructor']) 
 		p = re.compile('\s+$') 
+
+		# general remove trailing spaces
 		for k in item.fields.iterkeys(): 
 			item[k] = map(lambda x: p.sub('', x), item[k]) 
 		return item 
