@@ -1,0 +1,15 @@
+Class:
+
+year/quarter, major, course title, course number, professor, type, location, room, sec #, days, start, stop, building, room, res't
+
+Enrolled_over_time:
+
+foreign composite_key (class), time (when snapshot taken), #en, encp, #wl, wlcp, status
+
+Section:
+
+foreign composite_key (class), section id number, course id number/letter, type, location, room, sec, days, start, stop, building, room
+
+Section_over_time:
+
+foreign composite_key (section), time (when snapshot taken), #en, encp, #wl, wlcp, status
