@@ -9,7 +9,7 @@ class MySpider(Spider):
 	allowed_domains = ['ucla.edu']
 	base_url = "http://www.registrar.ucla.edu/schedule/schedulehome.aspx"
 	start_urls = ['http://www.registrar.ucla.edu/schedule/detselect.aspx?termsel=15S&subareasel=ENGL&idxcrs=0004W+++']
-	'''	
+	
 	def print_url(self,major, term):
 		#TODO: handle spaces in the url
 		url =  "http://www.registrar.ucla.edu/schedule/crsredir.aspx?termsel=" + term + "&subareasel="+ major
@@ -23,9 +23,9 @@ class MySpider(Spider):
 		majors = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_SOCmain_lstSubjectArea"]/option/@value').extract()
 		terms=[]
 		#TODO: verify this range
-		for year in range(1999,2015):
+		for year in range(1999,2016):
 			#TODO: add summer
-			for term in ['F','W','S']:
+			for term in ['F','W','S','1']:
 				terms.append(str(year)[2:]+term)
 
 		for major in majors:
@@ -35,17 +35,23 @@ class MySpider(Spider):
 			callback=self.get_course_list)
 
 	def get_course_list(self, response):
-		courses = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_crsredir1_lstCourseNormal"]/option/@value').extract()
+		courses = Selector(response).xpath('//select/option/@value').extract()
 
 		for course in courses:
 			url = response.url + "&idxcrs=" + course
-			url = url.replace('crsredir','detselect')
+
+			Semester = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_crsredir1_pnlBodyContent"]/span/text()').extract()
+			if not "Summer" in Semester[0]:
+				url = url.replace('crsredir','detselect')
+			else:
+				url = url.replace('crsredir','detselect_summer')
+
 			url = url.replace(' ','+')
 			yield Request(url=url,
 		callback=self.parse_page)
-	'''
+	
 	## change to parse_page if not crawling single page
-	def parse(self, response):
+	def parse_page(self, response):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
 		BodyContent = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]')
