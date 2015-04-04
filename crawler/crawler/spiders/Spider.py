@@ -12,6 +12,7 @@ class MySpider(Spider):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
 		BodyContent = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]')
+		
 		# general information
 		Semester = BodyContent.xpath('table[1]/tr[1]/td/span/text()').extract()
 		Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()

@@ -1,0 +1,1 @@
+`scrapy crawl UCLA` to scrape, followed by `-o foo.json/csv/xml` for output
