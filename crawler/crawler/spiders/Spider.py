@@ -12,7 +12,7 @@ class MySpider(Spider):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
 		BodyContent = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]')
-		
+
 		# general information
 		Semester = BodyContent.xpath('table[1]/tr[1]/td/span/text()').extract()
 		Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
@@ -30,7 +30,7 @@ class MySpider(Spider):
 			item['GeneralNotes'] = GeneralNotes
 			item['ClassNotes'] = ClassNotes
 			item['Title'] = Title
-			#item['Instructor'] = response.xpath(
+			item['Instructor'] = [] #TODO
 			item['IDNumber'] = lecture.xpath('td[@class="dgdClassDataColumnIDNumber"]/span/span/a/text()').extract()
 			item['ActType'] = lecture.xpath('td[@class="dgdClassDataActType"]/span/span/text()').extract()
 			item['Section'] = lecture.xpath('td[@class="dgdClassDataSectionNumber"]/span/span/text()').extract()
@@ -56,7 +56,7 @@ class MySpider(Spider):
 				item['GeneralNotes'] = GeneralNotes
 				item['ClassNotes'] = ClassNotes
 				item['Title'] = Title
-				#item['Instructor'] = response.xpath(
+				item['Instructor'] = [] #TODO
 				item['IDNumber'] = lab.xpath('td[@class="dgdClassDataColumnIDNumber"]/span[1]/a[1]/text()').extract()
 				item['ActType'] = lab.xpath('td[@class="dgdClassDataActType"]/span/text()').extract()
 				item['Section'] = lab.xpath('td[@class="dgdClassDataSectionNumber"]/span/text()').extract()
