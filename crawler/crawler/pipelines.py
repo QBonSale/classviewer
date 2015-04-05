@@ -19,6 +19,7 @@ def check_none(l):
 	else:
 		return l[0]
 
+# format to %H:%M:00
 def process_time(value):
 	if value:
 		value = value.split(':')
@@ -27,7 +28,7 @@ def process_time(value):
 		value[1] = value[1][:-1]
 		value = ':'.join(value)
 		print value
-	return value
+	return value+":00"
 
 """ 
 Cleans newlines and linefeeds from all fields in the item 
@@ -125,17 +126,31 @@ class SQLStore(object):
 
 			course_title = item['Title'][0] # varchar(255)
 
-			snapshot_time = convertTimestampToSQLDateTime(item['TimeStamp'][0])
+			snapshot_time = item['TimeStamp'][0] #string
 
-		except:
-			print "!!!!!!!!!!!Entry Dropped!!!!!!!!!!!!!!!!!"
+			num_en = check_none(item['EnrollTotal'])
+			if num_en:
+				num_en = int(num_en)
+			en_cap = check_none(item['EnrollCap'])
+			if en_cap:
+				en_cap = int(en_cap)
+			num_wl = check_none(item['WaitlistTotal'])
+			if num_wl:
+				num_wl = int(num_wl)
+			wl_cap = check_none(item['WaitlistCap'])
+			if wl_cap:
+				wl_cap = int(wl_cap)
 
-		return item
-'''
-			self.cursor.execute("INSERT INTO Movie(Description, Location,Title) VALUES (%s, %s, %s)", (item['Description'], item['Location'], item['Title']))
+			status = check_none(item['Status'])
+
+			cmd = "INSERT INTO class(year, quarter,major,course_number,professor,type,building,room,days,start,stop,rest,lecture_number,course_title) VALUES (%i, %s, %s,%s, %s,%s, %s,%s, %s,%s,%s,%i,%i,%s)", (year,quarter,major,course_number,professor,course_type,building,room,days,start,stop,rest,lecture_number,course_title)
+			self.cursor.execute(cmd)
 			self.conn.commit()
 
 		except MySQLdb.Error, e:
 			print "Error %d: %s" % (e.args[0], e.args[1])
+		except:
+			print "!!!!!!!!!!!Entry Dropped!!!!!!!!!!!!!!!!!"
+
 		return item
-'''
+
