@@ -9,7 +9,7 @@ $course_number = $mysqli->real_escape_string($_GET["course_number"]);
 $year = $mysqli->real_escape_string($_GET["year"]);
 $quarter = $mysqli->real_escape_string($_GET["quarter"]);
 
-$query = "SELECT professor FROM class WHERE major = '".$major."' AND course_number = '".$course_number."' AND year = '".$year."' AND quarter = '".$quarter."' group by professor";
+$query = "SELECT professor, lecture_number FROM class WHERE major = '".$major."' AND course_number = '".$course_number."' AND year = '".$year."' AND quarter = '".$quarter."' group by professor, lecture_number";
 
 if ($result = $mysqli->query($query)) {
 

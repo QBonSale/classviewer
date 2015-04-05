@@ -13,7 +13,8 @@ foreach($_GET as $query_string_variable => $value) {
         $whereClause = $whereClause . " AND ";
     }
     $empty = false;
-    $whereClause = $whereClause . $query_string_variable . " = " . $value;
+    $whereClause = $whereClause . $mysqli->real_escape_string($query_string_variable) . " = '" . 
+                 $mysqli->real_escape_string($value) . "'";
 }
 
 //echo $whereClause . "<Br />";
