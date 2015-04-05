@@ -6,12 +6,13 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import re
 import time
+import MySQLdb
 
 def convertTimestampToSQLDateTime(value):
-    return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(value))
+	return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(value))
 
 def convertSQLDateTimeToTimestamp(value):
-    return time.mktime(time.strptime(value, '%Y-%m-%d %H:%M:%S'))
+	return time.mktime(time.strptime(value, '%Y-%m-%d %H:%M:%S'))
 
 def check_none(l):
 	if not l:
@@ -52,11 +53,11 @@ Store into mysql
 '''
 
 class SQLStore(object):
-	'''
+	
   	def __init__(self):
-		self.conn = pymssql.connect(host='localhost', user='root', password='lahacks2015', database='classviewer')
+		self.conn = MySQLdb.connect(host='localhost', user='root', passwd='lahacks2015', db='classviewer')
 		self.cursor = self.conn.cursor()
-	'''
+	
 	def process_item(self, item, spider): 
 		try:
 			# quarter & year
@@ -71,8 +72,8 @@ class SQLStore(object):
 				quarter = quarter[0]
 			print 'quarter: '+quarter  
 
-			#id_number = int(item['IDNumber'][0])
-			#print 'id_number: '+str(id_number)
+			section_id_number= int(item['IDNumber'][0])
+			print 'section_id_number: '+str(id_number)
 
 			major = item['Subarea'][0]	# varchar(10) 
 			course_number = item['Title'][0]
@@ -116,13 +117,13 @@ class SQLStore(object):
 
 			Section = item['Section'][0]
 			sec =  re.search('[A-Za-z]+', Section)
-	  		if sec:
+	  		if section_id_number:
 	  			sec = sec.group() # get first group
 	  			print 'sec: '+sec
 			lecture_number = re.search('[0-9]+', Section)
 			if lecture_number:
-				lecture_number = lecture_number.group()
-				print 'lecture_number: '+lecture_number
+				lecture_number = int(lecture_number.group())
+				print 'lecture_number: '+str(lecture_number)
 
 			course_title = item['Title'][0] # varchar(255)
 
@@ -143,13 +144,26 @@ class SQLStore(object):
 
 			status = check_none(item['Status'])
 
-			cmd = "INSERT INTO class(year, quarter,major,course_number,professor,type,building,room,days,start,stop,rest,lecture_number,course_title) VALUES (%i, %s, %s,%s, %s,%s, %s,%s, %s,%s,%s,%i,%i,%s)", (year,quarter,major,course_number,professor,course_type,building,room,days,start,stop,rest,lecture_number,course_title)
+			cmd = "INSERT INTO class(year, quarter,major,course_number,professor,type,building,room,days,start,stop,rest,lecture_number,course_title) VALUES (%d, '%s', '%s','%s', '%s','%s', '%s','%s', '%s','%s','%s',%d,%d,'%s');"% (year,quarter,major,course_number,professor,course_type,building,room,days,start,stop,rest,lecture_number,course_title)
 			self.cursor.execute(cmd)
+
+			cmd = "INSERT INTO class_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d);"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number)
+			self.cursor.execute(cmd)
+
+			cmd = "INSERT INTO section(section_id_number,type,building,room,days,start,stop,rest,lecture_number,year) VALUES (%d,'%s', '%s','%s', '%s','%s','%s',%d,%d,%d);"% (section_id_number,course_type,building,room,days,start,stop,rest,lecture_number,year)
+			self.cursor.execute(cmd)
+
+			cmd = "INSERT INTO section_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d,'%s');"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,sec)
+			self.cursor.execute(cmd)
+
 			self.conn.commit()
 
 		except MySQLdb.Error, e:
-			print "Error %d: %s" % (e.args[0], e.args[1])
-		except:
+			try:
+				print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+			except IndexError:
+				print "MySQL Error: %s" % str(e)
+		except AttributeError:
 			print "!!!!!!!!!!!Entry Dropped!!!!!!!!!!!!!!!!!"
 
 		return item

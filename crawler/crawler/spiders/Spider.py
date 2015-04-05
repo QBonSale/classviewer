@@ -7,9 +7,13 @@ import time
 class MySpider(Spider):
 	name = 'UCLA'	# name used when executing
 	allowed_domains = ['ucla.edu']
-	base_url = "http://www.registrar.ucla.edu/schedule/schedulehome.aspx"
-	start_urls = ['http://www.registrar.ucla.edu/schedule/detselect.aspx?termsel=15S&subareasel=ENGL&idxcrs=0004W+++']
-	
+
+	def __init__(self, refresh=0, *args, **kwargs):
+		super(MySpider, self).__init__(*args, **kwargs)
+		self.base_url = "http://www.registrar.ucla.edu/schedule/schedulehome.aspx"
+		self.start_urls = ['http://www.registrar.ucla.edu/schedule/detselect.aspx?termsel=15S&subareasel=ENGL&idxcrs=0004W+++']
+		self.isRefresh = refresh
+
 	def print_url(self,major, term):
 		#TODO: handle spaces in the url
 		url =  "http://www.registrar.ucla.edu/schedule/crsredir.aspx?termsel=" + term + "&subareasel="+ major
@@ -17,18 +21,19 @@ class MySpider(Spider):
 
 	def start_requests(self):
 		#yield Request(url=self.start_urls, callback=self.parse_page)
-	#'''
-		yield Request(url=self.base_url,
-			callback=self.get_subarea_list)
+	
+		yield Request(url=self.base_url, callback=self.get_subarea_list)
 
 	def get_subarea_list(self, response):
 		majors = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_SOCmain_lstSubjectArea"]/option/@value').extract()
 		terms=[]
-		#TODO: verify this range
-		for year in range(1999,2016):
-			#TODO: add summer
-			for term in ['F','W','S','1']:
-				terms.append(str(year)[2:]+term)
+		
+		if self.isRefresh==1:
+			for year in range(1999,2016):
+				for term in ['F','W','S','1']:
+					terms.append(str(year)[2:]+term)
+		else:
+			terms = ['15S']	# TODO: self.isRefresh do is 0, but not working?
 
 		for major in majors:
 			for term in terms:
@@ -57,7 +62,7 @@ class MySpider(Spider):
 			request.meta['Title'] = Title
 			request.meta['Subarea'] = response.meta['Subarea']
 			yield request
-	#'''
+	
 	def parse_page(self, response):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
@@ -65,12 +70,12 @@ class MySpider(Spider):
 
 		# general information
 		Semester = BodyContent.xpath('table[1]/tr[1]/td/span/text()').extract()
-		#Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
-		Subarea = response.meta['Subarea']
+		Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
+		#Subarea = response.meta['Subarea']
 		GeneralNotes = BodyContent.xpath('table[1]/tr[3]/td/span/text()').extract()
 		ClassNotes = BodyContent.xpath('table[1]/tr[4]/td/span/text()').extract()
-		#Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')	# no idea why normal way won't work
-		Title = response.meta['Title']
+		Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')	# no idea why normal way won't work
+		#Title = response.meta['Title']
 		Instructor = sel.xpath('//*[@class="fachead"]/text()').extract()
 		counter = 0
 
