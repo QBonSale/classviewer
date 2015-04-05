@@ -16,6 +16,8 @@ class MySpider(Spider):
 		return url.replace(' ','+')
 
 	def start_requests(self):
+		#yield Request(url=self.start_urls, callback=self.parse_page)
+	#'''
 		yield Request(url=self.base_url,
 			callback=self.get_subarea_list)
 
@@ -55,8 +57,7 @@ class MySpider(Spider):
 			request.meta['Title'] = Title
 			request.meta['Subarea'] = response.meta['Subarea']
 			yield request
-	
-	## change to parse_page if not crawling single page
+	#'''
 	def parse_page(self, response):
 		self.log('Scraped: %s' % response.url)
 		sel = Selector(response)
