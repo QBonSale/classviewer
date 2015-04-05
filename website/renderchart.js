@@ -44,6 +44,8 @@ function populateChart(JSON_points) {
 	data: data
     };
     //console.log(JSON_points);
+    $('#graph').empty();
+    $('#graph').append("<canvas id='canvas' ></canvas>");
     var ctx = document.getElementById("canvas").getContext("2d");
     console.log(dataset);
     var myLine = new Chart(ctx).Line({
