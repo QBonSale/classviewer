@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `class`;
 CREATE TABLE `class` (
   `year` int(11) NOT NULL DEFAULT '0',
   `quarter` char(1) NOT NULL DEFAULT '',
-  `major` varchar(10) DEFAULT NULL,
+  `major` varchar(10) NOT NULL DEFAULT '',
   `course_number` varchar(10) NOT NULL DEFAULT '',
   `professor` varchar(100) DEFAULT NULL,
   `type` varchar(5) DEFAULT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `class` (
   `rest` tinyint(1) DEFAULT NULL,
   `lecture_number` int(11) NOT NULL DEFAULT '0',
   `course_title` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`year`,`quarter`,`course_number`,`lecture_number`)
+  PRIMARY KEY (`year`,`quarter`,`major`,`course_number`,`lecture_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -59,8 +59,9 @@ CREATE TABLE `class_over_time` (
   `quarter` char(1) DEFAULT NULL,
   `course_number` varchar(10) DEFAULT NULL,
   `lecture_number` int(11) DEFAULT NULL,
-  KEY `year` (`year`,`quarter`,`course_number`,`lecture_number`),
-  CONSTRAINT `class_over_time_ibfk_1` FOREIGN KEY (`year`, `quarter`, `course_number`, `lecture_number`) REFERENCES `class` (`year`, `quarter`, `course_number`, `lecture_number`)
+  `major` varchar(10) DEFAULT NULL,
+  KEY `year` (`year`,`quarter`,`major`,`course_number`,`lecture_number`),
+  CONSTRAINT `class_over_time_ibfk_1` FOREIGN KEY (`year`, `quarter`, `major`, `course_number`, `lecture_number`) REFERENCES `class` (`year`, `quarter`, `major`, `course_number`, `lecture_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -84,9 +85,10 @@ CREATE TABLE `section` (
   `course_number` varchar(10) DEFAULT NULL,
   `lecture_number` int(11) DEFAULT NULL,
   `year` int(11) DEFAULT NULL,
-  KEY `year` (`year`,`quarter`,`course_number`,`lecture_number`),
+  `major` varchar(10) DEFAULT NULL,
   KEY `year_2` (`year`,`lecture_number`,`course_number`,`quarter`,`sec`),
-  CONSTRAINT `section_ibfk_1` FOREIGN KEY (`year`, `quarter`, `course_number`, `lecture_number`) REFERENCES `class` (`year`, `quarter`, `course_number`, `lecture_number`)
+  KEY `year_3` (`year`,`quarter`,`major`,`course_number`,`lecture_number`),
+  CONSTRAINT `section_ibfk_1` FOREIGN KEY (`year`, `quarter`, `major`, `course_number`, `lecture_number`) REFERENCES `class` (`year`, `quarter`, `major`, `course_number`, `lecture_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -98,7 +100,7 @@ DROP TABLE IF EXISTS `section_over_time`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `section_over_time` (
-  `snapshot_time` datetime DEFAULT NULL,
+  `snapshot_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `num_en` int(11) DEFAULT NULL,
   `en_cap` int(11) DEFAULT NULL,
   `num_wl` int(11) DEFAULT NULL,
@@ -109,6 +111,7 @@ CREATE TABLE `section_over_time` (
   `course_number` varchar(10) DEFAULT NULL,
   `lecture_number` int(11) DEFAULT NULL,
   `sec` char(1) DEFAULT NULL,
+  PRIMARY KEY (`snapshot_time`),
   KEY `year` (`year`,`lecture_number`,`course_number`,`quarter`,`sec`),
   CONSTRAINT `section_over_time_ibfk_1` FOREIGN KEY (`year`, `lecture_number`, `course_number`, `quarter`, `sec`) REFERENCES `section` (`year`, `lecture_number`, `course_number`, `quarter`, `sec`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -123,4 +126,4 @@ CREATE TABLE `section_over_time` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-04-04 19:16:38
+-- Dump completed on 2015-04-05  2:05:49
