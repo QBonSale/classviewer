@@ -26,9 +26,13 @@ var lineChartData = {
 
 }
 
-window.onload = function(){
+function populateChart(JSON_points) {
+    console.log(JSON_points);
+}
+
+function load_graph(){
     var ctx = document.getElementById("canvas").getContext("2d");
-    window.myLine = new Chart(ctx).Line(lineChartData, {
+    var myLine = new Chart(ctx).Line(lineChartData, {
 	responsive: true
     });
 }
