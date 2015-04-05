@@ -17,5 +17,5 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 #USER_AGENT = 'crawler (+http://www.yourdomain.com)'
 ITEM_PIPELINES = {
 	'crawler.pipelines.SpacePipeline': 300,
-	#'crawler.pipelines.SQLStore': 500
+	'crawler.pipelines.SQLStore': 500
 }

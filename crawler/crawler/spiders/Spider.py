@@ -31,14 +31,15 @@ class MySpider(Spider):
 		for major in majors:
 			for term in terms:
 				url=self.print_url(major,term)
-				yield Request(url=url,
-			callback=self.get_course_list)
+				request = Request(url=url, callback=self.get_course_list)
+				request.meta['Subarea'] = [major]
+				yield request
 
 	def get_course_list(self, response):
-		courses = Selector(response).xpath('//select/option/@value').extract()
+		courses = Selector(response).xpath('//select/option')
 
 		for course in courses:
-			url = response.url + "&idxcrs=" + course
+			url = response.url + "&idxcrs=" + course.xpath('@value').extract()[0]
 
 			Semester = Selector(response).xpath('//*[@id="ctl00_BodyContentPlaceHolder_crsredir1_pnlBodyContent"]/span/text()').extract()
 			if not "Summer" in Semester[0]:
@@ -47,8 +48,13 @@ class MySpider(Spider):
 				url = url.replace('crsredir','detselect_summer')
 
 			url = url.replace(' ','+')
-			yield Request(url=url,
-		callback=self.parse_page)
+
+			Title = course.xpath('text()').extract()
+
+			request = Request(url=url, callback=self.parse_page)
+			request.meta['Title'] = Title
+			request.meta['Subarea'] = response.meta['Subarea']
+			yield request
 	
 	## change to parse_page if not crawling single page
 	def parse_page(self, response):
@@ -58,10 +64,12 @@ class MySpider(Spider):
 
 		# general information
 		Semester = BodyContent.xpath('table[1]/tr[1]/td/span/text()').extract()
-		Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
+		#Subarea = BodyContent.xpath('table[1]/tr[2]/td/span/text()').extract()
+		Subarea = response.meta['Subarea']
 		GeneralNotes = BodyContent.xpath('table[1]/tr[3]/td/span/text()').extract()
 		ClassNotes = BodyContent.xpath('table[1]/tr[4]/td/span/text()').extract()
-		Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')	# no idea why normal way won't work
+		#Title = sel.xpath('//*[@id="ctl00_BodyContentPlaceHolder_detselect_pnlBodyContent"]/table[2]').re(r'"coursehead">([^<]*)')	# no idea why normal way won't work
+		Title = response.meta['Title']
 		Instructor = sel.xpath('//*[@class="fachead"]/text()').extract()
 		counter = 0
 
@@ -91,7 +99,7 @@ class MySpider(Spider):
 			item['WaitlistTotal'] = lecture.xpath('td[@class="dgdClassDataWaitListTotal"]/span/span/text()').extract()
 			item['WaitlistCap'] = lecture.xpath('td[@class="dgdClassDataWaitListCap"]/span/span/text()').extract()
 			item['Status'] = lecture.xpath('td[@class="dgdClassDataStatus"]/span/span/span/text()').extract()	#additional span for color
-			item['TimeStamp'] = [time.strftime("%H:%M %d/%m/%Y")]
+			item['TimeStamp'] = [time.strftime("%Y-%m-%d %H:%M:%S")]
 			yield item
 
 			labs = section.xpath('tr[position()>2]')   # first one is header, second is main session
@@ -118,6 +126,6 @@ class MySpider(Spider):
 				item['WaitlistTotal'] = lab.xpath('td[@class="dgdClassDataWaitListTotal"]/span/text()').extract()
 				item['WaitlistCap'] = lab.xpath('td[@class="dgdClassDataWaitListCap"]/span/text()').extract()
 				item['Status'] = lab.xpath('td[@class="dgdClassDataStatus"]/span/span/text()').extract()	#additional span for color
-				item['TimeStamp'] = [time.strftime("%H:%M %d/%m/%Y")]
+				item['TimeStamp'] = [time.strftime("%Y-%m-%d %H:%M:%S")]
 				yield item
 			counter += 1

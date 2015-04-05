@@ -1,0 +1,82 @@
+mysql> show columns from class;
++----------------+--------------+------+-----+---------+-------+
+| Field          | Type         | Null | Key | Default | Extra |
++----------------+--------------+------+-----+---------+-------+
+| year           | int(11)      | NO   | PRI | 0       |       |
+| quarter        | char(1)      | NO   | PRI |         |       |
+| major          | varchar(10)  | YES  |     | NULL    |       |
+| course_number  | varchar(10)  | NO   | PRI |         |       |
+| professor      | varchar(100) | YES  |     | NULL    |       |
+| type           | varchar(5)   | YES  |     | NULL    |       |
+| building       | varchar(100) | YES  |     | NULL    |       |
+| room           | varchar(10)  | YES  |     | NULL    |       |
+| days           | varchar(7)   | YES  |     | NULL    |       |
+| start          | time         | YES  |     | NULL    |       |
+| stop           | time         | YES  |     | NULL    |       |
+| rest           | tinyint(1)   | YES  |     | NULL    |       |
+| lecture_number | int(11)      | NO   | PRI | 0       |       |
+| course_title   | varchar(255) | YES  |     | NULL    |       |
++----------------+--------------+------+-----+---------+-------+
+14 rows in set (0.00 sec)
+
+mysql> show columns from class_over_time;
++----------------+-------------+------+-----+---------+-------+
+| Field          | Type        | Null | Key | Default | Extra |
++----------------+-------------+------+-----+---------+-------+
+| snapshot_time  | datetime    | YES  |     | NULL    |       |
+| num_en         | int(11)     | YES  |     | NULL    |       |
+| en_cap         | int(11)     | YES  |     | NULL    |       |
+| num_wl         | int(11)     | YES  |     | NULL    |       |
+| wl_cap         | int(11)     | YES  |     | NULL    |       |
+| status         | varchar(10) | YES  |     | NULL    |       |
+| year           | int(11)     | YES  | MUL | NULL    |       |
+| quarter        | char(1)     | YES  |     | NULL    |       |
+| course_number  | varchar(10) | YES  |     | NULL    |       |
+| lecture_number | int(11)     | YES  |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+10 rows in set (0.00 sec)
+
+mysql> show columns from section;
++-------------------+--------------+------+-----+---------+-------+
+| Field             | Type         | Null | Key | Default | Extra |
++-------------------+--------------+------+-----+---------+-------+
+| section_id_number | int(11)      | YES  |     | NULL    |       |
+| type              | varchar(5)   | YES  |     | NULL    |       |
+| building          | varchar(100) | YES  |     | NULL    |       |
+| room              | varchar(10)  | YES  |     | NULL    |       |
+| sec               | char(1)      | YES  |     | NULL    |       |
+| days              | varchar(7)   | YES  |     | NULL    |       |
+| start             | time         | YES  |     | NULL    |       |
+| stop              | time         | YES  |     | NULL    |       |
+| quarter           | char(1)      | YES  |     | NULL    |       |
+| course_number     | varchar(10)  | YES  |     | NULL    |       |
+| lecture_number    | int(11)      | YES  |     | NULL    |       |
+| year              | int(11)      | YES  | MUL | NULL    |       |
++-------------------+--------------+------+-----+---------+-------+
+12 rows in set (0.01 sec)
+
+mysql> show columns from section_over_time;
++----------------+-------------+------+-----+---------+-------+
+| Field          | Type        | Null | Key | Default | Extra |
++----------------+-------------+------+-----+---------+-------+
+| snapshot_time  | datetime    | YES  |     | NULL    |       |
+| num_en         | int(11)     | YES  |     | NULL    |       |
+| en_cap         | int(11)     | YES  |     | NULL    |       |
+| num_wl         | int(11)     | YES  |     | NULL    |       |
+| wl_cap         | int(11)     | YES  |     | NULL    |       |
+| status         | varchar(10) | YES  |     | NULL    |       |
+| year           | int(11)     | YES  | MUL | NULL    |       |
+| quarter        | char(1)     | YES  |     | NULL    |       |
+| course_number  | varchar(10) | YES  |     | NULL    |       |
+| lecture_number | int(11)     | YES  |     | NULL    |       |
+| sec            | char(1)     | YES  |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+11 rows in set (0.00 sec)
+
+mysql> select * from class;
++------+---------+---------+---------------+--------------+------+----------+------+------+----------+----------+------+----------------+-----------------------------+
+| year | quarter | major   | course_number | professor    | type | building | room | days | start    | stop     | rest | lecture_number | course_title                |
++------+---------+---------+---------------+--------------+------+----------+------+------+----------+----------+------+----------------+-----------------------------+
+| 2014 | F       | COM SCI | 111           | EGGERT, P.R. | LEC  | BOELTER  | 3400 | MW   | 12:00:00 | 13:50:00 |    0 |              1 | Operating System Principles |
++------+---------+---------+---------------+--------------+------+----------+------+------+----------+----------+------+----------------+-----------------------------+
+1 row in set (0.00 sec)
