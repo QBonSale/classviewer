@@ -19,7 +19,6 @@ mysql> show columns from class;
 +----------------+--------------+------+-----+---------+-------+
 14 rows in set (0.00 sec)
 
-mysql> show columns from class_over_time;
 +----------------+-------------+------+-----+---------+-------+
 | Field          | Type        | Null | Key | Default | Extra |
 +----------------+-------------+------+-----+---------+-------+
@@ -33,8 +32,9 @@ mysql> show columns from class_over_time;
 | quarter        | char(1)     | YES  |     | NULL    |       |
 | course_number  | varchar(10) | YES  |     | NULL    |       |
 | lecture_number | int(11)     | YES  |     | NULL    |       |
+| major          | varchar(10) | YES  |     | NULL    |       |
 +----------------+-------------+------+-----+---------+-------+
-10 rows in set (0.00 sec)
+11 rows in set (0.00 sec)
 
 mysql> show columns from section;
 +-------------------+--------------+------+-----+---------+-------+
@@ -52,8 +52,9 @@ mysql> show columns from section;
 | course_number     | varchar(10)  | YES  |     | NULL    |       |
 | lecture_number    | int(11)      | YES  |     | NULL    |       |
 | year              | int(11)      | YES  | MUL | NULL    |       |
-+-------------------+--------------+------+-----+---------+-------+
-12 rows in set (0.01 sec)
+| major         	| varchar(10)	| YES |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+13 rows in set (0.01 sec)
 
 mysql> show columns from section_over_time;
 +----------------+-------------+------+-----+---------+-------+

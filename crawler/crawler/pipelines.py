@@ -117,7 +117,7 @@ class SQLStore(object):
 
 			Section = item['Section'][0]
 			sec =  re.search('[A-Za-z]+', Section)
-	  		if section_id_number:
+	  		if sec:
 	  			sec = sec.group() # get first group
 	  			print 'sec: '+sec
 			lecture_number = re.search('[0-9]+', Section)
@@ -147,13 +147,13 @@ class SQLStore(object):
 			cmd = "INSERT INTO class(year, quarter,major,course_number,professor,type,building,room,days,start,stop,rest,lecture_number,course_title) VALUES (%d, '%s', '%s','%s', '%s','%s', '%s','%s', '%s','%s','%s',%d,%d,'%s');"% (year,quarter,major,course_number,professor,course_type,building,room,days,start,stop,rest,lecture_number,course_title)
 			self.cursor.execute(cmd)
 
-			cmd = "INSERT INTO class_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d);"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number)
+			cmd = "INSERT INTO class_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,major) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d,'%s');"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,major)
 			self.cursor.execute(cmd)
 
-			cmd = "INSERT INTO section(section_id_number,type,building,room,days,start,stop,rest,lecture_number,year) VALUES (%d,'%s', '%s','%s', '%s','%s','%s',%d,%d,%d);"% (section_id_number,course_type,building,room,days,start,stop,rest,lecture_number,year)
+			cmd = "INSERT INTO section(section_id_number,type,building,room,sec,days,start,stop,quarter, course_number,lecture_number,year,major) VALUES (%d,'%s', '%s','%s','%s', '%s','%s','%s','%s','%s',%d,%d,'%s');" % (section_id_number,course_type,building,room,sec,days,start,stop,quarter,course_number,lecture_number,year,major)
 			self.cursor.execute(cmd)
 
-			cmd = "INSERT INTO section_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d,'%s');"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,sec)
+			cmd = "INSERT INTO section_over_time(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,sec) VALUES ('%s',%d,%d,%d,%d,'%s',%d,'%s','%s',%d,'%s');"%(snapshot_time,num_en,en_cap,num_wl,wl_cap,status,year,quarter,course_number,lecture_number,sec)
 			self.cursor.execute(cmd)
 
 			self.conn.commit()
