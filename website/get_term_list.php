@@ -4,7 +4,10 @@ ini_set('display_errors', 1);
 $mysqli = new mysqli('localhost','root','lahacks2015','classviewer');
 $myArray = array();
 
-$query = "SELECT major, course_number FROM class";
+$major = $mysqli->real_escape_string($_GET["major"]);
+$course_number = $mysqli->real_escape_string($_GET["course_number"]);
+
+$query = "SELECT year, quarter FROM class WHERE major = '".$major."' AND course_number = '".$course_number."' group by year, quarter";
 
 if ($result = $mysqli->query($query)) {
 
